@@ -18,6 +18,7 @@ import {
   MODEL_CANVAS_CLASS,
 } from './constants.js';
 import { OrbitController } from './orbit-controller.js';
+import { InlineStereoPresenter } from './inline-stereo.js';
 import { getRenderScheduler } from './render-scheduler.js';
 import {
   applyDOMMatrixToObject,
@@ -37,6 +38,7 @@ export class ModelRenderContext {
     this.onFirstRender = options.onFirstRender ?? (() => {});
     this.scheduler = getRenderScheduler();
     this.renderer = null;
+    this.rendererBackend = '';
     this.scene = null;
     this.camera = null;
     this.canvas = null;
@@ -58,6 +60,7 @@ export class ModelRenderContext {
     this.isVisible = typeof IntersectionObserver === 'undefined';
     this.resizeObserver = null;
     this.intersectionObserver = null;
+    this.inlineStereo = null;
   }
 
   async init() {
@@ -104,12 +107,41 @@ export class ModelRenderContext {
       return this;
     }
 
-    this.element.dataset.modelRenderer = this.renderer.backend?.isWebGPUBackend ? 'webgpu' : 'webgl2';
+    this.rendererBackend = this.renderer.backend?.isWebGPUBackend ? 'webgpu' : 'webgl2';
+    this.element.dataset.modelRenderer = this.rendererBackend;
     this.orbit = new OrbitController(this.element, this.canvas, () => {
       this.applyDefaultTransform();
       this.invalidate();
     });
     this.setStageMode(this.stageMode);
+    this.inlineStereo = new InlineStereoPresenter(this.element, this.scene, this.modelRoot, {
+      cameraDistance: this.cameraDistance,
+      onFrame: (delta) => {
+        this.onAnimationFrame(delta);
+        this.orbit?.tick(delta);
+      },
+      onPresented: (stereoCanvas) => {
+        if (this.disposed) return;
+        this.canvas.style.display = 'none';
+        this.orbit?.setCanvas(stereoCanvas);
+        this.element.dataset.modelRenderer = 'webgl2-inline-stereo';
+        this.element.dataset.modelStereo = 'inline-stereo';
+        this.element.dispatchEvent(new Event('stereostart'));
+        if (this.waitingForFirstRender) {
+          this.waitingForFirstRender = false;
+          this.onFirstRender();
+        }
+      },
+      onStopped: () => {
+        if (this.disposed) return;
+        this.canvas.style.display = 'block';
+        this.orbit?.setCanvas(this.canvas);
+        this.element.dataset.modelRenderer = this.rendererBackend;
+        delete this.element.dataset.modelStereo;
+        this.element.dispatchEvent(new Event('stereoend'));
+        this.invalidate();
+      },
+    });
 
     if (typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -139,6 +171,7 @@ export class ModelRenderContext {
     const portalHeight = height / CSS_PIXELS_PER_METRE;
 
     this.renderer.setSize(width, height, false);
+    this.inlineStereo?.resize();
     this.camera.aspect = width / height;
     this.camera.fov = 2 * Math.atan(portalHeight / (2 * this.cameraDistance)) * (180 / Math.PI);
     this.camera.updateProjectionMatrix();
@@ -160,6 +193,7 @@ export class ModelRenderContext {
     this.waitingForFirstRender = true;
     this.forceRender = true;
     this.invalidate();
+    this.inlineStereo?.start();
   }
 
   clearModel() {
@@ -240,11 +274,12 @@ export class ModelRenderContext {
 
   invalidate() {
     this.dirty = true;
-    this.scheduler.request();
+    if (!this.inlineStereo?.presented) this.scheduler.request();
   }
 
   frame(_time, delta) {
     if (this.disposed || !this.initialized) return false;
+    if (this.inlineStereo?.presented) return false;
     if (!this.isVisible && !this.forceRender) return false;
 
     const animationActive = this.onAnimationFrame(delta);
@@ -271,11 +306,13 @@ export class ModelRenderContext {
     this.scheduler.remove(this);
     this.resizeObserver?.disconnect();
     this.intersectionObserver?.disconnect();
+    this.inlineStereo?.dispose();
     this.orbit?.dispose();
     this.environmentTexture?.dispose();
     this.renderer?.dispose();
     this.canvas?.remove();
     delete this.element.dataset.modelRenderer;
+    delete this.element.dataset.modelStereo;
     this.clearModel();
     this.renderer = null;
     this.scene = null;

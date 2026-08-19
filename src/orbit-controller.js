@@ -29,14 +29,8 @@ export class OrbitController {
   enable() {
     if (this.enabled) return;
     this.enabled = true;
-    this.canvas.addEventListener('pointerdown', this.onPointerDown);
-    this.canvas.addEventListener('pointermove', this.onPointerMove);
-    this.canvas.addEventListener('pointerup', this.onPointerUp);
-    this.canvas.addEventListener('pointercancel', this.onPointerUp);
-    this.canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    this.attachCanvas();
     this.element.addEventListener('keydown', this.onKeyDown);
-    this.canvas.style.cursor = 'grab';
-    this.canvas.style.touchAction = 'none';
 
     if (!this.element.hasAttribute('tabindex')) {
       this.element.tabIndex = 0;
@@ -47,6 +41,35 @@ export class OrbitController {
     }
   }
 
+  attachCanvas() {
+    this.canvas.addEventListener('pointerdown', this.onPointerDown);
+    this.canvas.addEventListener('pointermove', this.onPointerMove);
+    this.canvas.addEventListener('pointerup', this.onPointerUp);
+    this.canvas.addEventListener('pointercancel', this.onPointerUp);
+    this.canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    this.canvas.style.cursor = 'grab';
+    this.canvas.style.touchAction = 'none';
+  }
+
+  detachCanvas() {
+    this.canvas.removeEventListener('pointerdown', this.onPointerDown);
+    this.canvas.removeEventListener('pointermove', this.onPointerMove);
+    this.canvas.removeEventListener('pointerup', this.onPointerUp);
+    this.canvas.removeEventListener('pointercancel', this.onPointerUp);
+    this.canvas.removeEventListener('wheel', this.onWheel);
+    this.canvas.style.cursor = '';
+    this.canvas.style.touchAction = '';
+  }
+
+  setCanvas(canvas) {
+    if (!canvas || canvas === this.canvas) return;
+    if (this.enabled) this.detachCanvas();
+    this.pointers.clear();
+    this.lastPinchDistance = 0;
+    this.canvas = canvas;
+    if (this.enabled) this.attachCanvas();
+  }
+
   disable() {
     if (!this.enabled) return;
     this.enabled = false;
@@ -54,14 +77,8 @@ export class OrbitController {
     this.lastPinchDistance = 0;
     this.yawVelocity = 0;
     this.pitchVelocity = 0;
-    this.canvas.removeEventListener('pointerdown', this.onPointerDown);
-    this.canvas.removeEventListener('pointermove', this.onPointerMove);
-    this.canvas.removeEventListener('pointerup', this.onPointerUp);
-    this.canvas.removeEventListener('pointercancel', this.onPointerUp);
-    this.canvas.removeEventListener('wheel', this.onWheel);
+    this.detachCanvas();
     this.element.removeEventListener('keydown', this.onKeyDown);
-    this.canvas.style.cursor = '';
-    this.canvas.style.touchAction = '';
 
     if (this.addedTabIndex) {
       this.element.removeAttribute('tabindex');

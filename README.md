@@ -4,6 +4,8 @@ This project provides a declarative fallback for the proposed HTML `<model>` ele
 
 Native `<model>` implementations are left untouched.
 
+When the browser grants the experimental WebXR `inline-stereo` feature, each loaded model automatically switches to the browser-provided left- and right-eye views. The regular WebGPU canvas remains available as the fallback if the session is unsupported or ends.
+
 ## Run the example
 
 ```sh
@@ -52,7 +54,7 @@ Embedded animation uses media-style controls:
 </script>
 ```
 
-The included demo has a live speed slider and play/pause control for the animated plane.
+The live page includes the animated plane with playback speed and play/pause controls.
 
 ## Supported behavior
 
@@ -63,10 +65,19 @@ The included demo has a live speed slider and play/pause control for the animate
 - `entityTransform` using `DOMMatrix`
 - `autoplay`, `loop`, `play()`, `pause()`, `currentTime`, `duration`, and `playbackRate`
 - `environmentmap`/`environmentMap` for equirectangular HDR lighting
-- `load`, `loadstart`, `progress`, `error`, `play`, `pause`, `ended`, and `iblload` events
+- Automatic fixed-view `inline-stereo` rendering through browser-provided `XRView` projection matrices and viewports
+- `load`, `loadstart`, `progress`, `error`, `play`, `pause`, `ended`, `iblload`, `stereostart`, `stereoend`, `stereoblocked`, `trackingstart`, and `trackingerror` events
 - Dynamic `<model>` elements and source/attribute changes
 
-After initialization, `data-model-renderer` is set to `webgpu` or `webgl2`, which is useful for diagnostics.
+After initialization, `data-model-renderer` is set to `webgpu`, `webgl2`, or `webgl2-inline-stereo`, which is useful for diagnostics. `data-model-stereo="inline-stereo"` is present while stereo presentation is active.
+
+Before presenting inline stereo, the polyfill checks the model and its ancestors for CSS effects that flatten descendants into an intermediate mono surface, including filters, backdrop filters, masks, clip paths, group opacity, blending, and overflow clipping combined with rounded corners. When found, it stays on the normal mono renderer, displays a warning on the model, emits `stereoblocked`, and sets `data-model-stereo-blocked` to the detected blocker codes.
+
+The inline-stereo path intentionally uses a second `WebGPURenderer({ forceWebGL: true })`. The current feature is defined around an `XRWebGLLayer` and its DOM output canvas, so WebGL2 is required for that presentation path even when ordinary rendering uses WebGPU. Viewport packing is never assumed; every frame uses `XRWebGLLayer.getViewport(view)`.
+
+Stereo placement derives the page's zero-disparity distance from the browser-provided left- and right-eye matrices, then normalizes model scale against the vertical projection. The model is recessed slightly beyond that plane so its nearest fitted surface appears behind the page rather than protruding in front of it. When tracking starts, the first local viewer pose anchors the existing placement in the stationary reference space, avoiding a visual jump between modes. The selected values are exposed as `data-model-page-distance` and `data-model-page-scale` for diagnostics.
+
+Fixed stereo starts with the non-tracking `viewer` reference space. While it is active, a small “Enable head tracking” button requests a replacement session with the user-granted `local` reference space. `data-model-tracking` is `fixed` or `head` for diagnostics.
 
 Because `model` is not a valid autonomous-custom-element name, the package manually upgrades existing nodes, observes DOM additions, and patches `document.createElement('model')`. A registered `<model-polyfill>` custom element is also available when a forced fallback is useful for testing alongside native support.
 
@@ -97,5 +108,7 @@ The library build keeps `three` external, so applications use their own compatib
 ## Current limitations
 
 - Each rendered element owns a `WebGPURenderer`; this is reliable across WebGPU canvases but is intended for pages with a modest number of simultaneously visible models.
+- Each stereo model requires its own inline XR session and WebGL2-backed presentation canvas.
+- Inline stereo starts without spatial permission; head tracking is requested only from the model's user-activated control.
 - The first animation clip is exposed through the media-style playback API.
 - The fallback cannot reproduce browser-only spatial privacy, system lighting, or native visionOS presentation behavior.
