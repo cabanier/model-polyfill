@@ -4,7 +4,7 @@ import {
   UPGRADED_ATTRIBUTE,
 } from './constants.js';
 
-const STYLE_ID = 'model-element-webgpu-polyfill-styles';
+const STYLE_ID = 'model-polyfill-styles';
 
 export function installDefaultStyles(documentObject = document) {
   if (documentObject.getElementById(STYLE_ID)) return;

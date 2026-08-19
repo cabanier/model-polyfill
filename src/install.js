@@ -6,7 +6,7 @@ import {
 } from './model-element.js';
 import { installDefaultStyles } from './styles.js';
 
-const INSTALLATION_KEY = Symbol.for('model-element-webgpu-polyfill.installation');
+const INSTALLATION_KEY = Symbol.for('model-polyfill.installation');
 
 function normalizeOptions(options) {
   return {

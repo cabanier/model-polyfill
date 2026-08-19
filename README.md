@@ -20,7 +20,7 @@ Open the URL printed by Vite. The live example uses the same damaged-helmet asse
 Import the module once, preferably from a module script in the document head:
 
 ```js
-import 'model-element-webgpu-polyfill';
+import 'model-polyfill';
 ```
 
 Then use declarative model markup:
@@ -86,7 +86,7 @@ Because `model` is not a valid autonomous-custom-element name, the package manua
 Importing the default entry installs automatically. It can also be controlled directly:
 
 ```js
-import { installModelPolyfill } from 'model-element-webgpu-polyfill';
+import { installModelPolyfill } from 'model-polyfill';
 
 const installation = installModelPolyfill({
   cameraDistance: 0.3,

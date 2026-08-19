@@ -1084,7 +1084,7 @@ function st(e, t) {
 }
 //#endregion
 //#region src/styles.js
-var ct = "model-element-webgpu-polyfill-styles";
+var ct = "model-polyfill-styles";
 function lt(e = document) {
 	if (e.getElementById(ct)) return;
 	let t = e.createElement("style");
@@ -1171,7 +1171,7 @@ function lt(e = document) {
 }
 //#endregion
 //#region src/install.js
-var Q = Symbol.for("model-element-webgpu-polyfill.installation");
+var Q = Symbol.for("model-polyfill.installation");
 function ut(e) {
 	return {
 		cameraDistance: e.cameraDistance,
@@ -1242,4 +1242,4 @@ typeof window < "u" && typeof document < "u" && $();
 //#endregion
 export { b as MODEL_READY_STATE, ie as SUPPORTED_MODEL_TYPES, B as collectModelSources, dt as getModelPolyfillInstallation, We as getModelState, Be as inferModelType, $ as installModelPolyfill, z as isSupportedModelType, R as normalizeModelType };
 
-//# sourceMappingURL=model-element-polyfill.js.map
+//# sourceMappingURL=model-polyfill.js.map

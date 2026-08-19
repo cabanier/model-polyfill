@@ -6,7 +6,7 @@ export default defineConfig({
     lib: {
       entry: 'src/index.js',
       formats: ['es'],
-      fileName: 'model-element-polyfill',
+      fileName: 'model-polyfill',
     },
     rollupOptions: {
       external: (id) => id === 'three' || id.startsWith('three/'),
