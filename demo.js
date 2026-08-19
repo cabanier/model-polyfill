@@ -27,6 +27,11 @@ const planeSource = document.querySelector('#plane-source');
 const planeRate = document.querySelector('#plane-rate');
 const planeRateOutput = document.querySelector('#plane-rate-output');
 const planePlaying = document.querySelector('#plane-playing');
+const chameleon = document.querySelector('#chameleon');
+const chameleonStatus = document.querySelector('#chameleon-status');
+const chameleonBackend = document.querySelector('#chameleon-backend');
+const chameleonSource = document.querySelector('#chameleon-source');
+const chameleonPlaying = document.querySelector('#chameleon-playing');
 
 model.addEventListener('stereostart', () => {
   backend.textContent = model.dataset.modelRenderer;
@@ -76,6 +81,38 @@ plane.addEventListener('trackingstart', () => {
 
 plane.addEventListener('trackingerror', (event) => {
   planeStatus.textContent = `Head tracking was not enabled: ${event.detail?.message ?? 'permission denied'}`;
+});
+
+function chameleonReadyMessage(prefix = 'Ready') {
+  const duration = Number.isFinite(chameleon.duration) ? `, ${chameleon.duration.toFixed(2)} seconds` : '';
+  return `${prefix}${duration}, looping.`;
+}
+
+chameleon.addEventListener('stereostart', () => {
+  chameleonBackend.textContent = chameleon.dataset.modelRenderer;
+  chameleonStatus.textContent = chameleonReadyMessage(
+    chameleon.dataset.modelTracking === 'head'
+      ? 'Ready — head-tracked inline stereo'
+      : 'Ready — inline stereo',
+  );
+});
+
+chameleon.addEventListener('stereoend', () => {
+  chameleonBackend.textContent = chameleon.dataset.modelRenderer;
+  chameleonStatus.textContent = chameleonReadyMessage();
+});
+
+chameleon.addEventListener('stereoblocked', (event) => {
+  chameleonBackend.textContent = chameleon.dataset.modelRenderer;
+  chameleonStatus.textContent = event.detail.message;
+});
+
+chameleon.addEventListener('trackingstart', () => {
+  chameleonStatus.textContent = chameleonReadyMessage('Ready — head-tracked inline stereo');
+});
+
+chameleon.addEventListener('trackingerror', (event) => {
+  chameleonStatus.textContent = `Head tracking was not enabled: ${event.detail?.message ?? 'permission denied'}`;
 });
 
 model.addEventListener('progress', (event) => {
@@ -149,4 +186,43 @@ try {
   }
 } catch (error) {
   planeStatus.textContent = `Could not initialize the animated plane: ${error.message}`;
+}
+
+chameleonPlaying.addEventListener('change', () => {
+  if (chameleonPlaying.checked) chameleon.play();
+  else chameleon.pause();
+});
+
+chameleon.addEventListener('play', () => {
+  chameleonPlaying.checked = true;
+});
+
+chameleon.addEventListener('pause', () => {
+  chameleonPlaying.checked = false;
+});
+
+chameleon.addEventListener('ended', () => {
+  chameleonPlaying.checked = false;
+});
+
+chameleon.addEventListener('progress', (event) => {
+  if (!event.detail.lengthComputable) return;
+  const percent = Math.round((event.detail.loaded / event.detail.total) * 100);
+  chameleonStatus.textContent = `Loading the animated chameleon… ${percent}%`;
+});
+
+chameleon.addEventListener('error', (event) => {
+  chameleonStatus.textContent = `Could not load the animated chameleon: ${event.detail?.message ?? 'unknown error'}`;
+});
+
+try {
+  await chameleon.ready;
+  if (!chameleon.dataset.modelStereoBlocked) {
+    chameleonStatus.textContent = chameleonReadyMessage();
+  }
+  chameleonBackend.textContent = chameleon.dataset.modelRenderer ?? 'native';
+  chameleonSource.textContent = new URL(chameleon.currentSrc, document.baseURI).pathname.split('/').pop();
+  chameleonPlaying.checked = !chameleon.paused;
+} catch (error) {
+  chameleonStatus.textContent = `Could not initialize the animated chameleon: ${error.message}`;
 }

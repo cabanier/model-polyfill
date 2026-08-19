@@ -92,6 +92,44 @@
         </div>
       </section>
 
+      <section class="demo-card animation-card chameleon-card" aria-labelledby="chameleon-title">
+        <div class="demo-copy">
+          <p class="eyebrow">Apple Quick Look USDZ</p>
+          <h2 id="chameleon-title">Animated chameleon</h2>
+          <p id="chameleon-status" role="status">Loading the animated chameleon…</p>
+          <p>
+            Animation and material variants from the
+            <a
+              href="https://developer.apple.com/quick-look-gallery/models/chameleon/chameleon_anim_mtl_variant.usdz"
+            >Apple Quick Look Gallery model</a>.
+          </p>
+
+          <label class="playing-toggle chameleon-playing">
+            <input id="chameleon-playing" type="checkbox" checked>
+            Playing animation
+          </label>
+
+          <dl>
+            <div><dt>Backend</dt><dd id="chameleon-backend">Detecting…</dd></div>
+            <div><dt>Source</dt><dd id="chameleon-source">Selecting…</dd></div>
+          </dl>
+        </div>
+
+        <model
+          id="chameleon"
+          class="chameleon-model"
+          stagemode="orbit"
+          autoplay
+          loop
+          alt="Animated chameleon standing on a branch"
+        >
+          <source
+            src="/models/chameleon_anim_mtl_variant.usdz"
+            type="model/vnd.usdz+zip"
+          >
+        </model>
+      </section>
+
       <details>
         <summary>Example markup</summary>
         <pre><code>&lt;model stagemode="orbit" alt="Damaged helmet"&gt;

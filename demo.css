@@ -20,7 +20,7 @@ body {
 }
 
 main {
-  width: min(1050px, calc(100% - 32px));
+  width: min(1280px, calc(100% - 32px));
   margin: 0 auto;
   padding: clamp(48px, 8vw, 100px) 0;
 }
@@ -73,7 +73,7 @@ h1 code {
 
 .demo-card {
   display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(300px, 1.2fr);
+  grid-template-columns: minmax(240px, 0.65fr) minmax(420px, 1.35fr);
   align-items: center;
   gap: clamp(28px, 5vw, 72px);
   margin-top: 56px;
@@ -116,7 +116,7 @@ dd {
 
 :is(model, model-polyfill) {
   display: block;
-  width: min(100%, 520px);
+  width: min(100%, 680px);
   height: auto;
   aspect-ratio: 1;
   justify-self: center;
@@ -154,6 +154,20 @@ dd {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
+}
+
+.chameleon-model {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+
+.chameleon-card a {
+  color: #8fe7dd;
+}
+
+.chameleon-playing {
+  margin-top: 24px;
 }
 
 .animation-controls {

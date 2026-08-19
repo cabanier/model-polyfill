@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
+    copyPublicDir: false,
     lib: {
       entry: 'src/index.js',
       formats: ['es'],
