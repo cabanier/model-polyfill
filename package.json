@@ -1,0 +1,44 @@
+{
+  "name": "model-element-webgpu-polyfill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Three.js WebGPU fallback for the proposed HTML <model> element.",
+  "type": "module",
+  "main": "./dist/model-element-polyfill.js",
+  "module": "./dist/model-element-polyfill.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./dist/model-element-polyfill.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "sideEffects": [
+    "./src/index.js",
+    "./dist/model-element-polyfill.js"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0",
+    "three": "^0.185.1",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "license": "UNLICENSED"
+}

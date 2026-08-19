@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebGPU &lt;model&gt; polyfill</title>
+    <link rel="stylesheet" href="/demo.css">
+    <script type="module" src="/demo.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Three.js WebGPURenderer</p>
+        <h1>A polyfilled <code>&lt;model&gt;</code> element</h1>
+        <p class="lede">Drag to rotate, pinch or scroll to zoom, and use the arrow keys when the model is focused.</p>
+      </header>
+
+      <section class="demo-card" aria-labelledby="demo-title">
+        <div class="demo-copy">
+          <h2 id="demo-title">Live example</h2>
+          <p id="status" role="status">Loading the model…</p>
+          <dl>
+            <div><dt>Backend</dt><dd id="backend">Detecting…</dd></div>
+            <div><dt>Source</dt><dd id="source">Selecting…</dd></div>
+          </dl>
+        </div>
+
+        <model
+          id="helmet"
+          stagemode="orbit"
+          alt="Battle-damaged science-fiction flight helmet"
+          aria-describedby="instructions"
+        >
+          <source
+            src="https://ada.is/immersiveweb/models/DamagedHelmet.usdz"
+            type="model/vnd.usdz+zip"
+          >
+          <source
+            src="https://ada.is/immersiveweb/models/DamagedHelmet.glb"
+            type="model/gltf-binary"
+          >
+          <img
+            src="https://ada.is/immersiveweb/models/DamagedHelmet.jpg"
+            alt="Battle-damaged science-fiction flight helmet"
+          >
+        </model>
+      </section>
+
+      <p id="instructions" class="instructions">
+        Mouse: drag and scroll. Touch: drag and pinch. Keyboard: arrows, plus, minus, and Home.
+      </p>
+
+      <section class="demo-card animation-card" aria-labelledby="animation-title">
+        <model
+          id="plane"
+          class="plane-model"
+          autoplay
+          loop
+          alt="Small animated plane with a spinning propeller"
+        >
+          <source
+            src="https://ada.is/immersiveweb/models/plane-mini.usdz"
+            type="model/vnd.usdz+zip"
+          >
+          <source
+            src="https://ada.is/immersiveweb/models/plane-optim.glb"
+            type="model/gltf-binary"
+          >
+        </model>
+
+        <div class="demo-copy">
+          <p class="eyebrow">Embedded animation</p>
+          <h2 id="animation-title">Propeller playback</h2>
+          <p id="plane-status" role="status">Loading the animated plane…</p>
+
+          <div class="animation-controls">
+            <label for="plane-rate">
+              Playback speed
+              <output id="plane-rate-output" for="plane-rate">1.0×</output>
+            </label>
+            <input id="plane-rate" type="range" min="0" max="10" step="0.1" value="1">
+            <label class="playing-toggle">
+              <input id="plane-playing" type="checkbox" checked>
+              Playing
+            </label>
+          </div>
+
+          <dl>
+            <div><dt>Backend</dt><dd id="plane-backend">Detecting…</dd></div>
+            <div><dt>Source</dt><dd id="plane-source">Selecting…</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <details>
+        <summary>Example markup</summary>
+        <pre><code>&lt;model stagemode="orbit" alt="Damaged helmet"&gt;
+  &lt;source src="helmet.usdz" type="model/vnd.usdz+zip"&gt;
+  &lt;source src="helmet.glb" type="model/gltf-binary"&gt;
+  &lt;img src="helmet.jpg" alt="Damaged helmet"&gt;
+&lt;/model&gt;</code></pre>
+      </details>
+    </main>
+  </body>
+</html>
