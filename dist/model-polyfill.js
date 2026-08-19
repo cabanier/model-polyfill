@@ -366,7 +366,7 @@ var Te = class {
 	resize() {
 		if (!this.renderer) return;
 		let e = this.element.getBoundingClientRect(), t = this.window.devicePixelRatio || 1, n = Math.max(Math.round(e.width * t), 1), r = Math.max(Math.round(e.height * t), 1);
-		if (this.renderer.setSize(n, r, !1), this.session) try {
+		if (this.renderer.setSize(n * 2, r, !1), this.session) try {
 			this.session.updateRenderState({ inlineVerticalFieldOfView: this.getInlineVerticalFieldOfView() });
 		} catch {}
 	}

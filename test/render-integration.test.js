@@ -17,6 +17,8 @@ vi.mock('three/webgpu', async (importOriginal) => ({
       this.toneMappingExposure = 1;
       this.viewportCalls = [];
       this.scissorCalls = [];
+      this.pixelRatioCalls = [];
+      this.sizeCalls = [];
       this.renderCount = 0;
       rendererState.instances.push(this);
     }
@@ -24,17 +26,22 @@ vi.mock('three/webgpu', async (importOriginal) => ({
     async init() {}
     dispose() {}
     clear() {}
-    getContext() { return {}; }
+    getContext() { return { canvas: this.domElement }; }
     render() {
       this.renderCount += 1;
       rendererState.renders += 1;
     }
     setScissor(...values) { this.scissorCalls.push(values); }
     setScissorTest() {}
-    setPixelRatio() {}
-    setSize(width, height) {
+    setPixelRatio(value) { this.pixelRatioCalls.push(value); }
+    setSize(width, height, updateStyle = true) {
+      this.sizeCalls.push([width, height, updateStyle]);
       this.domElement.width = width;
       this.domElement.height = height;
+      if (updateStyle) {
+        this.domElement.style.width = `${width}px`;
+        this.domElement.style.height = `${height}px`;
+      }
     }
     setViewport(...values) { this.viewportCalls.push(values); }
   },
@@ -216,6 +223,7 @@ describe('render lifecycle', () => {
   });
 
   it('switches to browser-provided inline stereo views when available', async () => {
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
     let xrFrameCallback = null;
     let trackedXrFrameCallback = null;
     let ended = false;
@@ -275,15 +283,18 @@ describe('render lifecycle', () => {
       },
     });
     window.XRWebGLLayer = class {
-      constructor(layerSession) {
+      constructor(layerSession, context) {
         this.session = layerSession;
+        this.context = context;
         this.framebuffer = null;
       }
 
       getViewport(view) {
+        const eyeWidth = this.context.canvas.width / 2;
+        const eyeHeight = this.context.canvas.height;
         return view.eye === 'left'
-          ? { x: 0, y: 0, width: 150, height: 200 }
-          : { x: 150, y: 0, width: 150, height: 200 };
+          ? { x: 0, y: 0, width: eyeWidth, height: eyeHeight }
+          : { x: eyeWidth, y: 0, width: eyeWidth, height: eyeHeight };
       }
     };
 
@@ -345,9 +356,15 @@ describe('render lifecycle', () => {
     expect(model.dataset.modelStereo).toBe('inline-stereo');
     expect(model.dataset.modelRenderer).toBe('webgl2-inline-stereo');
     expect(session.renderState.inlineVerticalFieldOfView).toBeGreaterThan(0);
+    expect(stereoRenderer.pixelRatioCalls).toEqual([1]);
+    expect(stereoRenderer.sizeCalls).toContainEqual([1200, 400, false]);
+    expect(stereoRenderer.domElement.width).toBe(1200);
+    expect(stereoRenderer.domElement.height).toBe(400);
+    expect(stereoRenderer.domElement.style.width).toBe('');
+    expect(stereoRenderer.domElement.style.height).toBe('');
     expect(stereoRenderer.renderCount).toBe(2);
-    expect(stereoRenderer.viewportCalls).toContainEqual([0, 0, 150, 200]);
-    expect(stereoRenderer.viewportCalls).toContainEqual([150, 0, 150, 200]);
+    expect(stereoRenderer.viewportCalls).toContainEqual([0, 0, 600, 400]);
+    expect(stereoRenderer.viewportCalls).toContainEqual([600, 0, 600, 400]);
     const modelRoot = getModelState(model).context.modelRoot;
     expect(modelRoot.position.z).toBeCloseTo(-expectedPageDistance - 0.01, 3);
     expect(modelRoot.scale.x).toBeCloseTo(1, 3);
@@ -415,6 +432,19 @@ describe('render lifecycle', () => {
         ],
       }),
     });
+    const trackedStereoRenderer = rendererState.instances
+      .filter((renderer) => renderer.options.forceWebGL)
+      .at(-1);
+    expect(trackedStereoRenderer).not.toBe(stereoRenderer);
+    expect(trackedStereoRenderer.pixelRatioCalls).toEqual([1]);
+    expect(trackedStereoRenderer.sizeCalls).toContainEqual([1200, 400, false]);
+    expect(trackedStereoRenderer.domElement.width).toBe(1200);
+    expect(trackedStereoRenderer.domElement.height).toBe(400);
+    expect(trackedStereoRenderer.domElement.style.width).toBe('');
+    expect(trackedStereoRenderer.domElement.style.height).toBe('');
+    expect(trackedStereoRenderer.renderCount).toBe(2);
+    expect(trackedStereoRenderer.viewportCalls).toContainEqual([0, 0, 600, 400]);
+    expect(trackedStereoRenderer.viewportCalls).toContainEqual([600, 0, 600, 400]);
     const insetPageDistance = trackedPageDistance + 0.01;
     const expectedTrackedXOffset = trackedHorizontalProjectionOffset
       * insetPageDistance / projectionCamera.projectionMatrix.elements[0];

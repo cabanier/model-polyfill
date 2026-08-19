@@ -333,9 +333,9 @@ export class InlineStereoPresenter {
     if (!this.renderer) return;
     const rect = this.element.getBoundingClientRect();
     const pixelRatio = this.window.devicePixelRatio || 1;
-    const width = Math.max(Math.round(rect.width * pixelRatio), 1);
-    const height = Math.max(Math.round(rect.height * pixelRatio), 1);
-    this.renderer.setSize(width, height, false);
+    const eyeWidth = Math.max(Math.round(rect.width * pixelRatio), 1);
+    const eyeHeight = Math.max(Math.round(rect.height * pixelRatio), 1);
+    this.renderer.setSize(eyeWidth * 2, eyeHeight, false);
     if (this.session) {
       try {
         this.session.updateRenderState({
