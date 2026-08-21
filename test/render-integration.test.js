@@ -126,7 +126,7 @@ describe('render lifecycle', () => {
     expect(model.boundingBoxExtents.x).toBeCloseTo(1);
     expect(model.boundingBoxExtents.y).toBeCloseTo(2);
     expect(model.boundingBoxExtents.z).toBeCloseTo(3);
-    expect(model.dataset.modelRenderer).toBe('webgpu');
+    expect(model.dataset.modelRenderer).toBe('webgl2');
     expect(model.querySelector('canvas[data-model-internal]')).not.toBeNull();
     expect(rendererState.renders).toBeGreaterThan(0);
   });
@@ -213,13 +213,15 @@ describe('render lifecycle', () => {
       requiredFeatures: ['inline-stereo'],
     });
     expect(session.end).toHaveBeenCalled();
-    expect(model.dataset.modelRenderer).toBe('webgpu');
+    expect(model.dataset.modelRenderer).toBe('webgl2');
     expect(model.dataset.modelStereo).toBeUndefined();
     expect(model.dataset.modelStereoBlocked).toContain('filter');
     expect(blockedDetail.blockers.some(({ code }) => code === 'filter')).toBe(true);
     expect(model.querySelector('.model-element-polyfill__stereo-warning').textContent)
       .toContain('Showing mono');
-    expect(rendererState.instances.some((renderer) => renderer.options.forceWebGL)).toBe(false);
+    expect(rendererState.instances.some((renderer) => (
+      renderer.domElement.classList.contains('model-element-polyfill__stereo-canvas')
+    ))).toBe(false);
   });
 
   it('switches to browser-provided inline stereo views when available', async () => {
@@ -348,7 +350,9 @@ describe('render lifecycle', () => {
       }),
     });
 
-    const stereoRenderer = rendererState.instances.find((renderer) => renderer.options.forceWebGL);
+    const stereoRenderer = rendererState.instances.find((renderer) => (
+      renderer.domElement.classList.contains('model-element-polyfill__stereo-canvas')
+    ));
     expect(requestSession).toHaveBeenCalledWith('inline', {
       requiredFeatures: ['inline-stereo'],
     });
@@ -433,7 +437,9 @@ describe('render lifecycle', () => {
       }),
     });
     const trackedStereoRenderer = rendererState.instances
-      .filter((renderer) => renderer.options.forceWebGL)
+      .filter((renderer) => (
+        renderer.domElement.classList.contains('model-element-polyfill__stereo-canvas')
+      ))
       .at(-1);
     expect(trackedStereoRenderer).not.toBe(stereoRenderer);
     expect(trackedStereoRenderer.pixelRatioCalls).toEqual([1]);
@@ -490,7 +496,7 @@ describe('render lifecycle', () => {
 
     expect(stereoEnded).toBe(true);
     expect(model.dataset.modelStereo).toBeUndefined();
-    expect(model.dataset.modelRenderer).toBe('webgpu');
+    expect(model.dataset.modelRenderer).toBe('webgl2');
 
     installation.disconnect();
     expect(ended).toBe(true);

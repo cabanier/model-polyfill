@@ -94,6 +94,7 @@ export class ModelRenderContext {
       alpha: true,
       antialias: true,
       canvas: this.canvas,
+      forceWebGL: true,
     });
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;

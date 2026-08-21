@@ -2,7 +2,7 @@
   "name": "model-polyfill",
   "version": "0.1.0",
   "private": true,
-  "description": "A Three.js WebGPU fallback for the proposed HTML <model> element.",
+  "description": "A Three.js fallback for the proposed HTML <model> element.",
   "type": "module",
   "main": "./dist/model-polyfill.js",
   "module": "./dist/model-polyfill.js",

@@ -585,7 +585,8 @@ var Ie = class {
 		return t.position.set(2, 3, 4), n.position.set(-4, 1, 2), r.position.set(1, -3, -2), this.scene.add(e, t, n, r), this.modelRoot = new m(), this.pivot = new m(), this.modelRoot.add(this.pivot), this.scene.add(this.modelRoot), this.renderer = new ne({
 			alpha: !0,
 			antialias: !0,
-			canvas: this.canvas
+			canvas: this.canvas,
+			forceWebGL: !0
 		}), this.renderer.outputColorSpace = ee, this.renderer.toneMapping = d, this.renderer.toneMappingExposure = 1.15, this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, this.maxPixelRatio)), this.resize(), await this.renderer.init(), this.disposed ? (this.renderer.dispose(), this) : (this.rendererBackend = this.renderer.backend?.isWebGPUBackend ? "webgpu" : "webgl2", this.element.dataset.modelRenderer = this.rendererBackend, this.orbit = new ue(this.element, this.canvas, () => {
 			this.applyDefaultTransform(), this.invalidate();
 		}), this.setStageMode(this.stageMode), this.inlineStereo = new Te(this.element, this.scene, this.modelRoot, {
@@ -1179,15 +1180,32 @@ function ut(e) {
 		maxPixelRatio: e.maxPixelRatio
 	};
 }
+function dt(e, t) {
+	let n = e.HTMLModelElement;
+	if (typeof n != "function" || n.isPolyfill === !0) return {
+		hasNativeElement: !1,
+		hasNativeSupport: !1
+	};
+	let r = t.createElement("model"), i = r instanceof n;
+	return {
+		hasNativeElement: i,
+		hasNativeSupport: i && typeof r.ready?.then == "function" && "boundingBoxCenter" in r && "boundingBoxExtents" in r && "entityTransform" in r
+	};
+}
 function $(e = {}) {
 	if (typeof window > "u" || typeof document > "u") return null;
 	if (window[Q]) return window[Q];
-	let t = ut(e), n = Object.getOwnPropertyDescriptor(window, "HTMLModelElement"), r = window.HTMLModelElement, i = "HTMLModelElement" in window && r?.isPolyfill !== !0, a = st(window, t), o = /* @__PURE__ */ new Set(), s = t.force || !i;
+	let t = ut(e), n = Object.getOwnPropertyDescriptor(window, "HTMLModelElement"), { hasNativeElement: r, hasNativeSupport: i } = dt(window, document), a = st(window, t), o = /* @__PURE__ */ new Set(), s = t.force || !i, c = s && r;
 	Object.defineProperty(a, "isPolyfill", { value: !0 }), lt(document), customElements.get("model-polyfill") || customElements.define("model-polyfill", a);
-	function c(e) {
+	function l(e) {
 		if (!(e instanceof window.HTMLElement)) return e;
-		let n = at(e, a, t);
-		return o.add(n), n;
+		let n = e;
+		if (c && e.nodeName === "MODEL") {
+			n = e.ownerDocument.createElement("model-polyfill");
+			for (let t of e.attributes) n.setAttribute(t.name, t.value);
+			n.append(...e.childNodes), e.isConnected && e.replaceWith(n);
+		}
+		return n = at(n, a, t), o.add(n), n;
 	}
 	if (s && !i) try {
 		Object.defineProperty(window, "HTMLModelElement", {
@@ -1198,48 +1216,48 @@ function $(e = {}) {
 	} catch {
 		window.HTMLModelElement = a;
 	}
-	s && document.querySelectorAll("model").forEach(c);
-	let l = s ? new MutationObserver((e) => {
+	s && document.querySelectorAll("model").forEach(l);
+	let u = s ? new MutationObserver((e) => {
 		for (let t of e) {
-			for (let e of t.addedNodes) e.nodeType === 1 && (e.nodeName === "MODEL" ? c(e) : e.nodeName === "MODEL-POLYFILL" && J(e), e.querySelectorAll?.("model").forEach(c));
+			for (let e of t.addedNodes) e.nodeType === 1 && (e.nodeName === "MODEL" ? l(e) : e.nodeName === "MODEL-POLYFILL" && J(e), e.querySelectorAll?.("model").forEach(l));
 			for (let e of t.removedNodes) e.nodeType === 1 && (!e.isConnected && (e.nodeName === "MODEL" || e.nodeName === "MODEL-POLYFILL") && Y(e), e.querySelectorAll?.("model, model-polyfill").forEach((e) => {
 				e.isConnected || Y(e);
 			}));
 		}
 	}) : null;
-	l?.observe(document.documentElement, {
+	u?.observe(document.documentElement, {
 		childList: !0,
 		subtree: !0
 	});
-	let u = window.Document.prototype.createElement, d = window.Document.prototype.createElementNS;
-	function f(e, t) {
-		let n = u.call(this, e, t);
-		return s && String(e).toLowerCase() === "model" && c(n), n;
+	let d = window.Document.prototype.createElement, f = window.Document.prototype.createElementNS;
+	function p(e, t) {
+		let n = d.call(this, e, t);
+		return s && String(e).toLowerCase() === "model" ? l(n) : n;
 	}
-	function p(e, t, n) {
-		let r = d.call(this, e, t, n);
-		return s && (!e || e === "http://www.w3.org/1999/xhtml") && String(t).toLowerCase() === "model" && c(r), r;
+	function m(e, t, n) {
+		let r = f.call(this, e, t, n);
+		return s && (!e || e === "http://www.w3.org/1999/xhtml") && String(t).toLowerCase() === "model" ? l(r) : r;
 	}
-	s && (window.Document.prototype.createElement = f, window.Document.prototype.createElementNS = p);
-	let m = {
+	s && (window.Document.prototype.createElement = p, window.Document.prototype.createElementNS = m);
+	let h = {
 		HTMLModelElement: a,
 		hasNativeSupport: i,
-		upgrade: c,
+		upgrade: l,
 		disconnect() {
-			l?.disconnect();
+			u?.disconnect();
 			for (let e of o) Y(e);
-			o.clear(), window.Document.prototype.createElement === f && (window.Document.prototype.createElement = u), window.Document.prototype.createElementNS === p && (window.Document.prototype.createElementNS = d), !i && window.HTMLModelElement === a && (n ? Object.defineProperty(window, "HTMLModelElement", n) : delete window.HTMLModelElement), delete window[Q];
+			o.clear(), window.Document.prototype.createElement === p && (window.Document.prototype.createElement = d), window.Document.prototype.createElementNS === m && (window.Document.prototype.createElementNS = f), !i && window.HTMLModelElement === a && (n ? Object.defineProperty(window, "HTMLModelElement", n) : delete window.HTMLModelElement), delete window[Q];
 		}
 	};
-	return window[Q] = m, m;
+	return window[Q] = h, h;
 }
-function dt() {
+function ft() {
 	return typeof window > "u" ? null : window[Q] ?? null;
 }
 //#endregion
 //#region src/index.js
 typeof window < "u" && typeof document < "u" && $();
 //#endregion
-export { b as MODEL_READY_STATE, ie as SUPPORTED_MODEL_TYPES, B as collectModelSources, dt as getModelPolyfillInstallation, We as getModelState, Be as inferModelType, $ as installModelPolyfill, z as isSupportedModelType, R as normalizeModelType };
+export { b as MODEL_READY_STATE, ie as SUPPORTED_MODEL_TYPES, B as collectModelSources, ft as getModelPolyfillInstallation, We as getModelState, Be as inferModelType, $ as installModelPolyfill, z as isSupportedModelType, R as normalizeModelType };
 
 //# sourceMappingURL=model-polyfill.js.map

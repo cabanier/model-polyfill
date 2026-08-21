@@ -1,20 +1,6 @@
 import { installModelPolyfill } from './src/install.js';
 
-const installation = installModelPolyfill();
-
-// Native <model> is a replaced element, so its children (including an injected
-// canvas) are not guaranteed to paint. Use the registered fallback element for
-// this demo when a native or experimental implementation is present.
-if (installation?.hasNativeSupport) {
-  for (const nativeModel of document.querySelectorAll('model')) {
-    const polyfilledModel = document.createElement('model-polyfill');
-    for (const attribute of nativeModel.attributes) {
-      polyfilledModel.setAttribute(attribute.name, attribute.value);
-    }
-    polyfilledModel.append(...nativeModel.childNodes);
-    nativeModel.replaceWith(polyfilledModel);
-  }
-}
+installModelPolyfill();
 
 const model = document.querySelector('#helmet');
 const status = document.querySelector('#status');

@@ -1,6 +1,6 @@
-# WebGPU `<model>` polyfill
+# Three.js `<model>` polyfill
 
-This project provides a declarative fallback for the proposed HTML `<model>` element. It uses Three.js `WebGPURenderer`, which selects WebGPU when available and falls back to its WebGL2 backend on older browsers.
+This project provides a declarative fallback for the proposed HTML `<model>` element. It uses Three.js `WebGPURenderer` with its WebGL2 backend.
 
 Native `<model>` implementations are left untouched.
 
@@ -69,11 +69,11 @@ The live page includes the animated plane with playback speed and play/pause con
 - `load`, `loadstart`, `progress`, `error`, `play`, `pause`, `ended`, `iblload`, `stereostart`, `stereoend`, `stereoblocked`, `trackingstart`, and `trackingerror` events
 - Dynamic `<model>` elements and source/attribute changes
 
-After initialization, `data-model-renderer` is set to `webgpu`, `webgl2`, or `webgl2-inline-stereo`, which is useful for diagnostics. `data-model-stereo="inline-stereo"` is present while stereo presentation is active.
+After initialization, `data-model-renderer` is set to `webgl2` or `webgl2-inline-stereo`, which is useful for diagnostics. `data-model-stereo="inline-stereo"` is present while stereo presentation is active.
 
 Before presenting inline stereo, the polyfill checks the model and its ancestors for CSS effects that flatten descendants into an intermediate mono surface, including filters, backdrop filters, masks, clip paths, group opacity, blending, and overflow clipping combined with rounded corners. When found, it stays on the normal mono renderer, displays a warning on the model, emits `stereoblocked`, and sets `data-model-stereo-blocked` to the detected blocker codes.
 
-The inline-stereo path intentionally uses a second `WebGPURenderer({ forceWebGL: true })`. The current feature is defined around an `XRWebGLLayer` and its DOM output canvas, so WebGL2 is required for that presentation path even when ordinary rendering uses WebGPU. Viewport packing is never assumed; every frame uses `XRWebGLLayer.getViewport(view)`.
+The inline-stereo path intentionally uses a second `WebGPURenderer({ forceWebGL: true })`. The current feature is defined around an `XRWebGLLayer` and its DOM output canvas, so WebGL2 is required for presentation. Viewport packing is never assumed; every frame uses `XRWebGLLayer.getViewport(view)`.
 
 Stereo placement derives the page's zero-disparity distance from the browser-provided left- and right-eye matrices, then normalizes model scale against the vertical projection. The model is recessed slightly beyond that plane so its nearest fitted surface appears behind the page rather than protruding in front of it. When tracking starts, the first local viewer pose anchors the existing placement in the stationary reference space, avoiding a visual jump between modes. The selected values are exposed as `data-model-page-distance` and `data-model-page-scale` for diagnostics.
 

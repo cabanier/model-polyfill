@@ -16,17 +16,32 @@ function normalizeOptions(options) {
   };
 }
 
+function detectNativeModelSupport(windowObject, documentObject) {
+  const ModelElement = windowObject.HTMLModelElement;
+  if (typeof ModelElement !== 'function' || ModelElement.isPolyfill === true) {
+    return { hasNativeElement: false, hasNativeSupport: false };
+  }
+  const element = documentObject.createElement('model');
+  const hasNativeElement = element instanceof ModelElement;
+  const hasNativeSupport = hasNativeElement
+    && typeof element.ready?.then === 'function'
+    && 'boundingBoxCenter' in element
+    && 'boundingBoxExtents' in element
+    && 'entityTransform' in element;
+  return { hasNativeElement, hasNativeSupport };
+}
+
 export function installModelPolyfill(options = {}) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return null;
   if (window[INSTALLATION_KEY]) return window[INSTALLATION_KEY];
 
   const normalizedOptions = normalizeOptions(options);
   const originalHTMLModelElementDescriptor = Object.getOwnPropertyDescriptor(window, 'HTMLModelElement');
-  const existingHTMLModelElement = window.HTMLModelElement;
-  const hasNativeSupport = 'HTMLModelElement' in window && existingHTMLModelElement?.isPolyfill !== true;
+  const { hasNativeElement, hasNativeSupport } = detectNativeModelSupport(window, document);
   const ModelElementClass = createHTMLModelElementPolyfillClass(window, normalizedOptions);
   const trackedElements = new Set();
   const shouldUpgradeModel = normalizedOptions.force || !hasNativeSupport;
+  const shouldReplaceModel = shouldUpgradeModel && hasNativeElement;
 
   Object.defineProperty(ModelElementClass, 'isPolyfill', { value: true });
   installDefaultStyles(document);
@@ -37,7 +52,16 @@ export function installModelPolyfill(options = {}) {
 
   function upgrade(element) {
     if (!(element instanceof window.HTMLElement)) return element;
-    const upgraded = upgradeModelElement(element, ModelElementClass, normalizedOptions);
+    let upgraded = element;
+    if (shouldReplaceModel && element.nodeName === 'MODEL') {
+      upgraded = element.ownerDocument.createElement('model-polyfill');
+      for (const attribute of element.attributes) {
+        upgraded.setAttribute(attribute.name, attribute.value);
+      }
+      upgraded.append(...element.childNodes);
+      if (element.isConnected) element.replaceWith(upgraded);
+    }
+    upgraded = upgradeModelElement(upgraded, ModelElementClass, normalizedOptions);
     trackedElements.add(upgraded);
     return upgraded;
   }
@@ -85,14 +109,14 @@ export function installModelPolyfill(options = {}) {
 
   function patchedCreateElement(name, elementOptions) {
     const element = originalCreateElement.call(this, name, elementOptions);
-    if (shouldUpgradeModel && String(name).toLowerCase() === 'model') upgrade(element);
+    if (shouldUpgradeModel && String(name).toLowerCase() === 'model') return upgrade(element);
     return element;
   }
 
   function patchedCreateElementNS(namespace, name, elementOptions) {
     const element = originalCreateElementNS.call(this, namespace, name, elementOptions);
     const isHTML = !namespace || namespace === 'http://www.w3.org/1999/xhtml';
-    if (shouldUpgradeModel && isHTML && String(name).toLowerCase() === 'model') upgrade(element);
+    if (shouldUpgradeModel && isHTML && String(name).toLowerCase() === 'model') return upgrade(element);
     return element;
   }
 
