@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Apple USDZ model gallery</title>
+    <link rel="stylesheet" href="./demo.css">
+    <link rel="stylesheet" href="./apple-models.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.tsl.js",
+          "three/addons/loaders/USDLoader.js": "https://cdn.jsdelivr.net/gh/cabanier/three.js@661b50c842180ab8f7066df8f64c39cad160f58f/examples/jsm/loaders/USDLoader.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./apple-models.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Apple Quick Look Gallery</p>
+        <h1>USDZ model gallery</h1>
+        <p class="lede">Choose a locally hosted Apple model, then drag to orbit and scroll or pinch to zoom.</p>
+      </header>
+
+      <section class="demo-card apple-gallery-card" aria-labelledby="gallery-title">
+        <div class="demo-copy">
+          <h2 id="gallery-title">Choose a model</h2>
+
+          <fieldset class="model-picker">
+            <legend>Apple model</legend>
+            <div class="model-buttons">
+              <button
+                type="button"
+                data-src="./public/models/chameleon_anim_mtl_variant.usdz"
+                data-alt="Animated chameleon standing on a branch"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/chameleon/chameleon_anim_mtl_variant.usdz"
+                aria-controls="apple-model"
+                aria-pressed="true"
+              >Chameleon</button>
+              <button
+                type="button"
+                data-src="./public/models/hummingbird_anim.usdz"
+                data-alt="Animated hummingbird"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/hummingbird/hummingbird_anim.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Hummingbird</button>
+              <button
+                type="button"
+                data-src="./public/models/robot.usdz"
+                data-alt="Vintage toy robot"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/vintagerobot2k/robot.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Vintage robot</button>
+              <button
+                type="button"
+                data-src="./public/models/slide.usdz"
+                data-alt="Children's playground slide"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/kids-slide/slide.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Playground slide</button>
+              <button
+                type="button"
+                data-src="./public/models/solar_panels.usdz"
+                data-alt="Array of solar panels"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/solar-panels/solar_panels.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Solar panels</button>
+              <button
+                type="button"
+                data-src="./public/models/teapot.usdz"
+                data-alt="Decorative teapot"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/teapot/teapot.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Teapot</button>
+              <button
+                type="button"
+                data-src="./public/models/toy_biplane_realistic.usdz"
+                data-alt="Realistic toy biplane"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/biplane/toy_biplane_realistic.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Toy biplane</button>
+              <button
+                type="button"
+                data-src="./public/models/toy_car.usdz"
+                data-alt="Detailed toy car"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/toycar/toy_car.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Toy car</button>
+              <button
+                type="button"
+                data-src="./public/models/toy_drummer.usdz"
+                data-alt="Animated toy drummer"
+                data-apple-url="https://developer.apple.com/quick-look-gallery/models/drummertoy/toy_drummer.usdz"
+                aria-controls="apple-model"
+                aria-pressed="false"
+              >Toy drummer</button>
+            </div>
+          </fieldset>
+
+          <p id="gallery-status" role="status">Loading the chameleon…</p>
+          <p>
+            Original asset:
+            <a id="apple-source-link" href="https://developer.apple.com/quick-look-gallery/models/chameleon/chameleon_anim_mtl_variant.usdz">download from Apple</a>
+          </p>
+
+          <dl>
+            <div><dt>Backend</dt><dd id="gallery-backend">Detecting…</dd></div>
+            <div><dt>File</dt><dd id="gallery-source">chameleon_anim_mtl_variant.usdz</dd></div>
+          </dl>
+        </div>
+
+        <model
+          id="apple-model"
+          class="apple-gallery-model"
+          src="./public/models/chameleon_anim_mtl_variant.usdz"
+          type="model/vnd.usdz+zip"
+          stagemode="orbit"
+          autoplay
+          loop
+          alt="Animated chameleon standing on a branch"
+          aria-describedby="gallery-instructions"
+        ></model>
+      </section>
+
+      <p id="gallery-instructions" class="instructions">
+        Mouse: drag and scroll. Touch: drag and pinch. Keyboard: arrows, plus, minus, and Home.
+      </p>
+
+      <nav class="page-navigation" aria-label="Demo pages">
+        <a href="./index.html">← Back to the main demo</a>
+      </nav>
+    </main>
+  </body>
+</html>

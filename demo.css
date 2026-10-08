@@ -215,6 +215,15 @@ details {
   background: rgba(14, 16, 25, 0.7);
 }
 
+.page-navigation {
+  margin-top: 28px;
+}
+
+.page-navigation a {
+  color: #8fe7dd;
+  font-weight: 700;
+}
+
 summary {
   cursor: pointer;
   font-weight: 700;

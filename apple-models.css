@@ -1,0 +1,63 @@
+.apple-gallery-card {
+  align-items: start;
+}
+
+.apple-gallery-card .demo-copy {
+  align-self: center;
+  min-width: 0;
+}
+
+.model-picker {
+  margin: 26px 0 22px;
+  padding: 0;
+  border: 0;
+}
+
+.model-picker legend {
+  margin-bottom: 10px;
+  padding: 0;
+  color: #dfe2eb;
+  font-weight: 700;
+}
+
+.model-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.model-buttons button {
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: #111522;
+  color: #f7f8fc;
+  font: inherit;
+  cursor: pointer;
+}
+
+.model-buttons button:hover {
+  border-color: rgba(143, 231, 221, 0.65);
+  background: #1a2030;
+}
+
+.model-buttons button[aria-pressed="true"] {
+  border-color: #8fe7dd;
+  background: #8fe7dd;
+  color: #071310;
+  font-weight: 750;
+}
+
+.model-buttons button:focus-visible {
+  outline: 3px solid #8fe7dd;
+  outline-offset: 2px;
+}
+
+.apple-gallery-card a {
+  color: #8fe7dd;
+}
+
+.apple-gallery-model {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
